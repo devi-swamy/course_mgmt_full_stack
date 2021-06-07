@@ -6,6 +6,7 @@ const cors = require("cors");
 const db = require("./db");
 
 app.set("db", db);
+console.log(db);
 
 app.use("/", (req, res) => {
   console.log("started");
