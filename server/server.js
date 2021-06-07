@@ -1,16 +1,10 @@
 const express = require("express");
+const middlewares = require("./middleware");
 const app = express();
-const session = require("express-session");
-const morgan = require("morgan");
-const cors = require("cors");
-const db = require("./db");
+const root = require("./routes/root");
 
-app.set("db", db);
-console.log(db);
-
-app.use("/", (req, res) => {
-  console.log("started");
-  res.json("hello world");
-});
-
+//Handling session
+app.set("trust proxy", 1); // trust first proxy
+app.use(middlewares);
+app.use("/", root);
 app.listen(3001, () => "Server Started Listening");
