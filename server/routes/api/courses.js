@@ -87,20 +87,74 @@ app.post("/", (req, res) => {
     }
   });
 });
-// app.put("/:id", () => {});
+app.delete("/:id", (req, res) => {
+  const db = req.app.get("db");
+  console.log(req.params.id);
+  if (req.session.Users) {
+    db("user_courses")
+      .where({
+        COURSEID: req.params.id
+      })
+      .then(rows => {
+        const MatchedCourse = rows.find(
+          course => course.COURSEID == req.params.id
+        );
+        console.log("M", MatchedCourse);
+        if (MatchedCourse) {
+          if (MatchedCourse.AUTHOR === req.session.Users.USERNAME) {
+            db("user_courses")
+              .where({ COURSEID: req.params.id })
+              .update({ DELETED: true, UPDATEDON: new Date() })
+              .then(() => {
+                res.status(204).json(MatchedCourse);
+              });
+          } else {
+            res.status(403).json("Unbale to delete the course!!!!");
+          }
+        } else {
+          res.status(404).json("Course not found");
+        }
+      });
+  } else {
+    res.status(403).json("Unbale to Update the course!!!!");
+  }
+});
 
-// app.delete("/:id", () => {
-//   const db = req.app.get("db");
-//   db("user_courses")
-//     .where({
-//       COURSEID: req.params.id
-//     })
-//     .then(rows => {
-//       if (rows.length === 1) {
-//         res.status(200).json(rows);
-//       } else {
-//         res.status(404).json("Course not found");
-//       }
-//     });
-// });
+app.put("/:id", (req, res) => {
+  const db = req.app.get("db");
+  if (req.session.Users) {
+    const { CName, description } = req.body;
+    db("user_courses")
+      .where({
+        COURSEID: req.params.id
+      })
+      .then(rows => {
+        const MatchedCourse = rows.find(
+          course => course.COURSEID == req.params.id
+        );
+        if (MatchedCourse) {
+          if (MatchedCourse.AUTHOR === req.session.Users.USERNAME) {
+            db("user_courses")
+              .where({ COURSEID: req.params.id })
+              .update({
+                COURSENAME: CName,
+                DESCRIPTION: description,
+                UPDATEDON: new Date()
+              })
+              .then(() => {
+                res.status(202).json("Course Updated");
+              });
+          } else {
+            res.status(403).json("Unbale to delete the course!!!!");
+          }
+
+          res.status(200).json(rows);
+        } else {
+          res.status(404).json("Course not found");
+        }
+      });
+  } else {
+    res.status(403).json("Unbale to Update the course!!!!");
+  }
+});
 module.exports = app;
