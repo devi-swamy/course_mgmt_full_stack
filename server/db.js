@@ -7,5 +7,4 @@ const db = require("knex")({
     password: "Welcome123"
   }
 });
-
 module.exports = db;
